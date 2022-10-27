@@ -1,73 +1,31 @@
+//Asetukset
 const PORT = process.env.PORT || 3000;
 var express = require("express");
 var app = express();    //express-moduuli
-require("dotenv").config(); /* Haetaan ympäristömuuttujat .env tiedostosta */
 const mongoose = require("mongoose");
+require("dotenv").config(); /* Haetaan ympäristömuuttujat .env tiedostosta */
+
 
 //Bodyparser käyttöön REST-tyyppisten lomakkeiden asiointiin.
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-//Variables
-var DbKäyttäjä = process.env.DB_USER    //From .env käyttis ja salasana
-var DbSalasana = process.env.DB_PASS    //From .env käyttis ja salasana
-//Tässä on meidän linkki MongoDB Atlakseen
-const uri = "mongodb+srv://" + DbKäyttäjä + ":" + DbSalasana + "@cluster0.pbknvna.mongodb.net/VSOP_database?retryWrites=true&w=majority";
-
-
-// Connecto to db
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
-// Määritellään Inventory-niminen Schema, eli tietomalli taulukkoon tallennettavista olioista.
-const InventorySchema = new mongoose.Schema({
-
-    productName: String,
-    productDescription: String,
-    productType: String,
-    quantity: Number,
-    image: String,
-    productDate: Date
-});
-
+//Modelit Components/mongoDB.js tiedostosta
+var schema1 = require('./Components/mongoDB.js');
 //Määritellään InventorySchema => Model
 const Inventory = mongoose.model(
     "Inventory",
-    InventorySchema,
+    schema1,
     "inventory"
 );
-
-// Määritellään Orders-niminen Schema, eli tietomalli taulukkoon tallennettavista olioista.
-const OrdersSchema = new mongoose.Schema({
-
-    firstName: String,
-    lastName: String,
-    phoneNumber: String,
-    customerEmail: String,
-    productsInfo: {
-        type: Map,
-        of: String,
-        ref: "Inventory"
-    },
-    quantity: Number,
-    price: Number,
-    orderDate: Date,
-    deliveryAddress: String,
-    deliveryPostalCode: String,
-    deliveryCity: String,
-    billingAddress: String,
-    billingPostalCode: String,
-    billingCity: String,
-    status: String,
-    inventory_image: String
-});
-
 //Määritellään OrdersSchema => Model
 const Orders = mongoose.model(
     "Orders",
-    OrdersSchema,
+    schema1,
     "orders"
 );
+
 
 //Polut alla
 app.get("/", function (req, res) {
@@ -77,7 +35,6 @@ app.get("/", function (req, res) {
 
 //consoleen tuo kaikki Inventory dokumentit
 app.get("/findInventory", function (req, res) {
-    res.send('Find.')
     Inventory.find({}, null, { limit: 50 }, function (err, results) {
         if (err) {
             console.log("Järjestelmässä tapahtui virhe", 500);
@@ -92,14 +49,16 @@ app.get("/findInventory", function (req, res) {
 
 //consoleen tuo yhden Inventory dokumentin productName mukaan, joka saadaan url
 app.get("/findOneInventory/:productName", function (req, res) {
-    res.send('FindProductname.')
-    Inventory.find({ productName: req.params.productName }, function (err, results) {
+    Inventory.find({ productName: "Simply Audio device" }, function (err, results) {
         if (err) {
             console.log("Järjestelmässä tapahtui virhe", 500);
+            console.log(req.params.productName);
         }
         // Muuten lähetetään tietokannan tulokset selaimelle 
         else {
-            console.log(results + "From findOne")
+            console.log(results + "From findOne");
+            console.log(req.params.productName);
+            res.json(results);
         }
     });
 });
@@ -134,7 +93,6 @@ app.post("/addProduct", function (req, res) {
 
 //consoleen tuo kaikki Orders dokumentit
 app.get("/findOrders", function (req, res) {
-    res.send('Find.')
     Orders.find({}, null, { limit: 50 }, function (err, results) {
         if (err) {
             console.log("Järjestelmässä tapahtui virhe", 500);
@@ -142,20 +100,21 @@ app.get("/findOrders", function (req, res) {
         // Muuten lähetetään tietokannan tulokset selaimelle 
         else {
             console.log(results)
+            res.json(results);
         }
     });
 });
 
 //consoleen tuo yhden order _id mukaan, joka saadaan url
-app.get("/findOneOrders/:productName", function (req, res) {
-    res.send('FindProductname.')
-    Orders.find({ productName: req.params.productName }, function (err, results) {
+app.get("/findOneOrders/:id", function (req, res) {
+    Orders.findById({ _id: req.params.id }, function (err, results) {
         if (err) {
             console.log("Järjestelmässä tapahtui virhe", 500);
         }
         // Muuten lähetetään tietokannan tulokset selaimelle 
         else {
-            console.log(results + "From findOne")
+            console.log(results + "From findOne");
+            res.json(results);
         }
     });
 });
