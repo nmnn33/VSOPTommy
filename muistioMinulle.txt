@@ -1,0 +1,1 @@
+POSTMAN - mene "Body" sarakkeelle -> valitse vetovalikkosta x-www-form-urlencoded, kun tahdot tehdä POST tyyppisen kutsun.

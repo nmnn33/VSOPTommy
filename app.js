@@ -151,7 +151,7 @@ app.post("/addOrder", function (req, res) {
     }
 });
 
-// Päivittää Id:n perusteella yhden order dokumentin nimen Junioriksi
+// Päivittää Id:n perusteella yhden order dokumentin nimen Junioriksi (ei toimi vielä)
 app.put("updateOrder/:id", function (req, res) {
     var id = req.params.id;
 
